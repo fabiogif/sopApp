@@ -1,24 +1,31 @@
-
 import React from 'react';
-import { Text } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {createStackNavigator} from '@react-navigation/stack';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import SignIn from '../pages/signIn/';
+import Main from '../pages/main';
 
-const Tab = createBottomTabNavigator();
-
-function Wildcard({ title }) {
-  return <Text>Wildcard {title}</Text>
-}
+const Stack  = createStackNavigator();
 
 export default function DashboardRoutes() {
-  return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={
-        () => <Wildcard title="Teste Home" />
-        } />
-        
-      <Tab.Screen name="Settings" component={ 
-        () => <Wildcard title="TESTE" />
-        } />
-    </Tab.Navigator>
-  );
-}
+    return (
+      <Stack.Navigator 
+      headerMode="none"
+      screenOptions={{
+          cardStyle:{
+              backgroundColor: Colors.white
+          }
+      }}>
+        <Stack.Screen
+          name="Main"
+          component={Main}          
+        />       
+        <Stack.Screen
+          name="SignIn"
+          component={SignIn}          
+        />    
+      </Stack.Navigator>
+    
+    
+    )
+};
+

@@ -1,10 +1,9 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 
-import { StatusBar, Modal, AsyncStorage } from 'react-native';
+import {StatusBar, Modal, AsyncStorage} from 'react-native';
 
-import MapboxGL from "@react-native-mapbox-gl/maps";
-import { RNCamera } from 'react-native-camera';
-
+import MapboxGL from '@react-native-mapbox-gl/maps';
+import {RNCamera} from 'react-native-camera';
 
 import api from '../../services/api';
 
@@ -42,6 +41,7 @@ import {
   DetailsModalRealtySubTitle,
   DetailsModalRealtyAddress,
 } from './styles';
+const startingPoint = [-12.9704, -38.5124];
 
 export default class Main extends Component {
   static navigationOptions = {
@@ -67,7 +67,7 @@ export default class Main extends Component {
     },
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     this.getLocation();
   }
 
@@ -75,29 +75,34 @@ export default class Main extends Component {
     try {
       const response = await api.get('/properties', {
         params: {
-          latitude: -27.210768,
-          longitude: -49.644018,
+          latitude: -12.972218,
+          longitude: -38.501414,
         },
       });
-      this.setState({ locations: response.data });
+      this.setState({locations: response.data});
     } catch (err) {
+      alert('erro', err);
       console.tron.log(err);
     }
-  }
+  };
 
-  handleNewRealtyPress = () => this.setState({ newRealty: !this.state.newRealty })
+  handleNewRealtyPress = () =>
+    this.setState({newRealty: !this.state.newRealty});
 
-  handleCameraModalClose = () => this.setState({ cameraModalOpened: !this.state.cameraModalOpened })
+  handleCameraModalClose = () =>
+    this.setState({cameraModalOpened: !this.state.cameraModalOpened});
 
-  handleDataModalClose = () => this.setState({
-    dataModalOpened: !this.state.dataModalOpened,
-    cameraModalOpened: false,
-  })
+  handleDataModalClose = () =>
+    this.setState({
+      dataModalOpened: !this.state.dataModalOpened,
+      cameraModalOpened: false,
+    });
 
-  handleDetailsModalClose = index => this.setState({
-    detailsModalOpened: !this.state.detailsModalOpened,
-    realtyDetailed: index,
-  })
+  handleDetailsModalClose = index =>
+    this.setState({
+      detailsModalOpened: !this.state.detailsModalOpened,
+      realtyDetailed: index,
+    });
 
   handleGetPositionPress = async () => {
     try {
@@ -115,46 +120,56 @@ export default class Main extends Component {
     } catch (err) {
       console.tron.log(err);
     }
-  }
+  };
 
   handleTakePicture = async () => {
     if (this.camera) {
-      const options = { quality: 0.5, base64: true, forceUpOrientation: true, fixOrientation: true, };
-      const data = await this.camera.takePictureAsync(options)
-      const { realtyData } = this.state;
-      this.setState({ realtyData: {
-        ...realtyData,
-        images: [
-          ...realtyData.images,
-          data,
-        ]
-      }})
+      const options = {
+        quality: 0.5,
+        base64: true,
+        forceUpOrientation: true,
+        fixOrientation: true,
+      };
+      const data = await this.camera.takePictureAsync(options);
+      const {realtyData} = this.state;
+      this.setState({
+        realtyData: {
+          ...realtyData,
+          images: [...realtyData.images, data],
+        },
+      });
     }
-  }
+  };
 
   handleInputChange = (index, value) => {
-    const { realtyData } = this.state;
+    const {realtyData} = this.state;
     switch (index) {
       case 'name':
-        this.setState({ realtyData: {
-          ...realtyData,
-          name: value,
-        }});
+        this.setState({
+          realtyData: {
+            ...realtyData,
+            name: value,
+          },
+        });
         break;
       case 'address':
-        this.setState({ realtyData: {
-          ...realtyData,
-          address: value,
-        }});
+        this.setState({
+          realtyData: {
+            ...realtyData,
+            address: value,
+          },
+        });
         break;
       case 'price':
-        this.setState({ realtyData: {
-          ...realtyData,
-          price: value,
-        }});
+        this.setState({
+          realtyData: {
+            ...realtyData,
+            price: value,
+          },
+        });
         break;
     }
-  }
+  };
 
   saveRealty = async () => {
     try {
@@ -163,12 +178,9 @@ export default class Main extends Component {
           name,
           address,
           price,
-          location: {
-            latitude,
-            longitude
-          },
-          images
-        }
+          location: {latitude, longitude},
+          images,
+        },
       } = this.state;
       const newRealtyResponse = await api.post('/properties', {
         title: name,
@@ -177,14 +189,14 @@ export default class Main extends Component {
         latitude: Number(latitude.toFixed(6)),
         longitude: Number(longitude.toFixed(6)),
       });
-        alert(newRealtyResponse);
+      alert(newRealtyResponse);
       const imagesData = new FormData();
 
       images.forEach((image, index) => {
         imagesData.append('image', {
           uri: image.uri,
           type: 'image/jpeg',
-          name: `${newRealtyResponse.data.title}_${index}.jpg`
+          name: `${newRealtyResponse.data.title}_${index}.jpg`,
         });
       });
 
@@ -193,15 +205,15 @@ export default class Main extends Component {
         imagesData,
       );
 
-      this.getLocation()
-      this.handleDataModalClose()
-      this.setState({ newRealty: false });
+      this.getLocation();
+      this.handleDataModalClose();
+      this.setState({newRealty: false});
     } catch (err) {
       console.tron.log(err);
     }
-  }
+  };
 
-  renderConditionalsButtons = () => (
+  renderConditionalsButtons = () =>
     !this.state.newRealty ? (
       <NewButtonContainer onPress={this.handleNewRealtyPress}>
         <ButtonText>Nova Ocorrência</ButtonText>
@@ -215,79 +227,78 @@ export default class Main extends Component {
           <ButtonText>Cancelar</ButtonText>
         </CancelButtonContainer>
       </ButtonsWrapper>
-    )
-  )
+    );
 
-  renderLocations = () => (
+  renderLocations = () =>
     this.state.locations.map((location, index) => (
       <MapboxGL.PointAnnotation
         id={location.id.toString()}
-        coordinate={[parseFloat(location.longitude), parseFloat(location.latitude)]}
-        key={location.id.toString()}
-      >
+        coordinate={startingPoint}
+        key={location.id.toString()}>
         <AnnotationContainer>
-          <AnnotationText onPress={() => this.handleDetailsModalClose(index) }>{location.price}</AnnotationText>
+          <AnnotationText onPress={() => this.handleDetailsModalClose(index)}>
+            {location.price}
+          </AnnotationText>
         </AnnotationContainer>
       </MapboxGL.PointAnnotation>
-    ))
-  )
+    ));
 
-  renderMarker = () => (
-    this.state.newRealty && !this.state.cameraModalOpened &&
-    <Marker resizeMode="contain" source={require('../../images/marker.png')} />
-    )
+  renderMarker = () =>
+    this.state.newRealty &&
+    !this.state.cameraModalOpened && (
+      <Marker
+        resizeMode="contain"
+        source={require('../../images/marker.png')}
+      />
+    );
 
-  renderImagesList = () => (
+  renderImagesList = () =>
     this.state.realtyData.images.length !== 0 && (
       <ModalImagesListContainer>
         <ModalImagesList horizontal>
-          { this.state.realtyData.images.map(image => (
-            <ModalImageItem source={{ uri: image.uri }} resizeMode="stretch" />
+          {this.state.realtyData.images.map(image => (
+            <ModalImageItem source={{uri: image.uri}} resizeMode="stretch" />
           ))}
         </ModalImagesList>
       </ModalImagesListContainer>
-    )
-  )
+    );
 
-  renderDetailsImagesList = () => (
+  renderDetailsImagesList = () =>
     this.state.detailsModalOpened && (
       <ModalImagesList horizontal>
-        { this.state.locations[this.state.realtyDetailed].images.map(image => (
+        {this.state.locations[this.state.realtyDetailed].images.map(image => (
           <ModalImageItem
             key={image.id}
-            source={{ uri: `http://10.0.3.2:3333/images/${image.path}` }}
+            source={{uri: `http://10.0.3.2:3333/images/${image.path}`}}
             resizeMode="stretch"
           />
         ))}
       </ModalImagesList>
-    )
-  )
+    );
 
   renderCameraModal = () => (
     <Modal
       visible={this.state.cameraModalOpened}
       transparent={false}
       animationType="slide"
-      onRequestClose={this.handleCameraModalClose}
-    >
+      onRequestClose={this.handleCameraModalClose}>
       <ModalContainer>
         <ModalContainer>
-        <RNCamera
+          <RNCamera
             ref={camera => {
               this.camera = camera;
             }}
-            style={{ flex: 1 }}
+            style={{flex: 1}}
             type={RNCamera.Constants.Type.back}
             autoFocus={RNCamera.Constants.AutoFocus.on}
             flashMode={RNCamera.Constants.FlashMode.off}
-            androidCameraPermissionOptions={"Permission to use camera"}
-           
+            androidCameraPermissionOptions={'Permission to use camera'}
           />
           <TakePictureButtonContainer onPress={this.handleTakePicture}>
             <TakePictureButtonLabel />
           </TakePictureButtonContainer>
         </ModalContainer>
-        { this.renderImagesList() }
+        {this.renderImagesList()}
         <ModalButtons>
           <CameraButtonContainer onPress={this.handleCameraModalClose}>
             <CancelButtonText>Cancelar</CancelButtonText>
@@ -298,39 +309,36 @@ export default class Main extends Component {
         </ModalButtons>
       </ModalContainer>
     </Modal>
-  )
+  );
 
   renderDataModal = () => (
     <Modal
       visible={this.state.dataModalOpened}
       transparent={false}
       animationType="slide"
-      onRequestClose={this.handleDataModalClose}
-    >
+      onRequestClose={this.handleDataModalClose}>
       <ModalContainer>
         <ModalContainer>
           <MapboxGL.MapView
             centerCoordinate={[
               this.state.realtyData.location.longitude,
-              this.state.realtyData.location.latitude
+              this.state.realtyData.location.latitude,
             ]}
-            style={{ flex: 1 }}
-            styleURL={MapboxGL.StyleURL.Dark}
-          >
+            style={{flex: 1}}
+            styleURL={MapboxGL.StyleURL.Dark}>
             <MapboxGL.PointAnnotation
               id="center"
               coordinate={[
                 this.state.realtyData.location.longitude,
-                this.state.realtyData.location.latitude
-              ]}
-            >
+                this.state.realtyData.location.latitude,
+              ]}>
               <MarkerContainer>
                 <MarkerLabel />
               </MarkerContainer>
             </MapboxGL.PointAnnotation>
           </MapboxGL.MapView>
         </ModalContainer>
-        { this.renderImagesList() }
+        {this.renderImagesList()}
         <Form>
           <Input
             placeholder="Ocorrência"
@@ -364,18 +372,18 @@ export default class Main extends Component {
         </DataButtonsWrapper>
       </ModalContainer>
     </Modal>
-  )
+  );
 
   renderDetailsModal = () => (
     <Modal
       visible={this.state.detailsModalOpened}
       transparent={false}
       animationType="slide"
-      onRequestClose={this.handleDetailsModalClose}
-    >
+      onRequestClose={this.handleDetailsModalClose}>
       <ModalContainer>
         <DetailsModalFirstDivision>
-          <DetailsModalBackButton onPress={() => this.handleDetailsModalClose(null)}>
+          <DetailsModalBackButton
+            onPress={() => this.handleDetailsModalClose(null)}>
             Voltar
           </DetailsModalBackButton>
         </DetailsModalFirstDivision>
@@ -383,45 +391,50 @@ export default class Main extends Component {
           <DetailsModalRealtyTitle>
             {this.state.detailsModalOpened
               ? this.state.locations[this.state.realtyDetailed].title
-              : ''
-            }
+              : ''}
           </DetailsModalRealtyTitle>
-          <DetailsModalRealtySubTitle>Casa mobiliada com 3 quartos + quintal</DetailsModalRealtySubTitle>
+          <DetailsModalRealtySubTitle>
+            Casa mobiliada com 3 quartos + quintal
+          </DetailsModalRealtySubTitle>
           <DetailsModalRealtyAddress>
             {this.state.detailsModalOpened
               ? this.state.locations[this.state.realtyDetailed].address
-              : ''
-            }
+              : ''}
           </DetailsModalRealtyAddress>
-          { this.renderDetailsImagesList() }
+          {this.renderDetailsImagesList()}
         </DetailsModalSecondDivision>
         <DetailsModalThirdDivision>
-          <DetailsModalPrice>R$ {this.state.detailsModalOpened
-            ? this.state.locations[this.state.realtyDetailed].price
-            : 0
-          }</DetailsModalPrice>
+          <DetailsModalPrice>
+            R${' '}
+            {this.state.detailsModalOpened
+              ? this.state.locations[this.state.realtyDetailed].price
+              : 0}
+          </DetailsModalPrice>
         </DetailsModalThirdDivision>
       </ModalContainer>
     </Modal>
-  )
+  );
 
   render() {
     return (
       <Container>
         <StatusBar barStyle="light-content" />
         <MapboxGL.MapView
-           zoomEnabled = {true}  
-          style={{ flex: 1 }}
+          zoomEnabled={true}
+          zoomLevel={10}
+          centerCoordinate={startingPoint}
+          style={{flex: 1}}
           styleURL={MapboxGL.StyleURL.Dark}
-          ref={(map) => { this.map = map; }}
-        >
+          ref={map => {
+            this.map = map;
+          }}>
           {this.renderLocations()}
         </MapboxGL.MapView>
-        { this.renderConditionalsButtons() }
-        { this.renderMarker() }
-        { this.renderCameraModal() }
-        { this.renderDataModal() }
-        { this.renderDetailsModal() }
+        {this.renderConditionalsButtons()}
+        {this.renderMarker()}
+        {this.renderCameraModal()}
+        {this.renderDataModal()}
+        {this.renderDetailsModal()}
       </Container>
     );
   }

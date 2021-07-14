@@ -3,12 +3,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { StatusBar } from 'react-native';
+import { StatusBar , Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
-import { StackActions, NavigationActions } from 'react-navigation';
-
+import 'react-native-gesture-handler';
 import api from '../../services/api';
+import DashboardRoutes from '../../routes/dashboard.routes';
 
 import {
   Container,
@@ -21,7 +22,19 @@ import {
   SignUpLinkText,
 } from './styles';
 
+function GoToButton() {
+  const navigation = useNavigation();
+
+  return (
+    <Button
+      onPress={() => navigation.navigate('Main')}
+    />
+  );
+}
+
+
 export default class SignIn extends Component {
+
   static navigationOptions = {
     header: null,
   };
@@ -48,48 +61,19 @@ export default class SignIn extends Component {
   };
 
   handleCreateAccountPress = () => {
-    this.props.navigation.navigate('SignUp');
+    navigation.navigate('SignUp');
   };
 
-  handleSignInPress = async () => {    
-    if (this.state.email.length === 0 || this.state.password.length === 0) {
-      // eslint-disable-next-line prettier/prettier
-      this.setState({ error: 'Preencha usuário e senha para continuar!' }, () => false);
-    } else {
-      try {
-        const response = await api.post('/sessions', {
-          email: this.state.email,
-          password: this.state.password,
-        });
-       
-        await AsyncStorage.setItem('@sp:token', response.data.token);
-     
+  handleSignInPress = async () => { 
+    alert('Teste');
+    this.props.navigation.navigate('Main');
+    };
+  
 
-      /*  const resetAction = StackActions.reset({
-          index: 0,
-          actions: [
-            NavigationActions.navigate({ routeName: 'Main' }),
-          ],
-        });
-       
-        this.props.navigation.dispatch(resetAction);
-        */
-        const resetAction = StackActions.reset({
-          index: 0,
-          actions: [NavigationActions.navigate({ routeName: 'Main' })],
-        });
-        this.props.navigation.dispatch(resetAction);
-
-        alert(response.data.token);
-      } catch (_err) {
-        alert(_err);
-        // eslint-disable-next-line prettier/prettier
-        this.setState({ error: 'Houve um problema com o login, verifique suas credenciais!' });
-      }
-      }
-  };
 
   render() {
+    const { navigate } = this.props.navigation;
+
     return (
       <Container>
         <StatusBar hidden />
@@ -109,14 +93,20 @@ export default class SignIn extends Component {
           autoCorrect={false}
           secureTextEntry
         />
+        
         {this.state.error.length !== 0 && <ErrorMessage>{this.state.error}</ErrorMessage>}
         <Button onPress={this.handleSignInPress}>
           <ButtonText>Entrar</ButtonText>
         </Button>
-        <SignUpLink onPress={this.handleCreateAccountPress}>
+        <SignUpLink onPress={GoToButton}>
           <SignUpLinkText>Meu Primeiro Acesso</SignUpLinkText>
         </SignUpLink>
-      </Container>
+          <DashboardRoutes />
+        </Container>
+ 
+
+
+   
     );
   }
 }
