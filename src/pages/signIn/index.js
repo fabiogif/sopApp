@@ -24,7 +24,6 @@ import {
 } from './styles';
 
 function GoToButton() {
-  const navigation = useNavigation();
 
   return (
     <Button
@@ -66,6 +65,8 @@ export default class SignIn extends Component {
   };
 
   handleSignInPress = async () => { 
+    const navigation = useNavigation();
+
     if (this.state.email.length === 0 || this.state.password.length === 0) {
       this.setState({ error: 'Preencha usuário e senha para continuar!' }, () => false);
     } else {
@@ -75,15 +76,13 @@ export default class SignIn extends Component {
           password: this.state.password,
         });
         await AsyncStorage.setItem('@sp:token', response.data.token);
+        
+        navigation.navigate('Main');
 
-        const resetAction = StackActions.reset({
-          index: 0,
-          actions: [
-            NavigationActions.navigate({ routeName: 'Main' }),
-          ],
-        });
-        this.props.navigation.dispatch(resetAction);
+
+
       } catch (_err) {
+        alert(_err);
         this.setState({ error: 'Houve um problema com o login, verifique suas credenciais!' });
       }
     }
