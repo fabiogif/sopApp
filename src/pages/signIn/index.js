@@ -66,9 +66,29 @@ export default class SignIn extends Component {
   };
 
   handleSignInPress = async () => { 
-    alert('Teste');
-    this.props.navigation.navigate('Main');
-    };
+    if (this.state.email.length === 0 || this.state.password.length === 0) {
+      this.setState({ error: 'Preencha usuário e senha para continuar!' }, () => false);
+    } else {
+      try{
+        const response = await api.post('/sessions', {
+          email: this.state.email,
+          password: this.state.password,
+        });
+        await AsyncStorage.setItem('@sp:token', response.data.token);
+
+        const resetAction = StackActions.reset({
+          index: 0,
+          actions: [
+            NavigationActions.navigate({ routeName: 'Main' }),
+          ],
+        });
+        this.props.navigation.dispatch(resetAction);
+      } catch (_err) {
+        this.setState({ error: 'Houve um problema com o login, verifique suas credenciais!' });
+      }
+    }
+  
+  };
   
 
 
@@ -77,7 +97,6 @@ export default class SignIn extends Component {
 
     return (
       <Container>
-        <StatusBar hidden />
         <Logo source={require('../../images/logo-sop.png')} resizeMode="contain" />
         <TextCoupom>Sistema de ocorrências publicas</TextCoupom>
         <Input
