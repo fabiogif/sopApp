@@ -78,9 +78,7 @@ export default class SignIn extends Component {
         await AsyncStorage.setItem('@sp:token', response.data.token);
         
         navigation.navigate('Main');
-
-
-
+        
       } catch (_err) {
         alert(_err);
         this.setState({ error: 'Houve um problema com o login, verifique suas credenciais!' });
