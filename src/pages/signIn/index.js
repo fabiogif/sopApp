@@ -20,6 +20,7 @@ import {
   ButtonText,
   SignUpLink,
   SignUpLinkText,
+  TextCoupom
 } from './styles';
 
 function GoToButton() {
@@ -77,7 +78,8 @@ export default class SignIn extends Component {
     return (
       <Container>
         <StatusBar hidden />
-        <Logo source={require('../../images/airbnb_logo.png')} resizeMode="contain" />
+        <Logo source={require('../../images/logo-sop.png')} resizeMode="contain" />
+        <TextCoupom>Sistema de ocorrências publicas</TextCoupom>
         <Input
           placeholder="Endereço de e-mail"
           value={this.state.email}
