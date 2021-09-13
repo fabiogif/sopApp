@@ -1,11 +1,10 @@
-import React,  {Component} from 'react';
+import React, {Component} from 'react';
 
 import {StatusBar, Modal, AsyncStorage} from 'react-native';
 
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {RNCamera} from 'react-native-camera';
- 
-MapboxGL.setAccessToken('pk.eyJ1IjoiZmFiaW9zYW50YW5hZ2lmIiwiYSI6ImNrcG44bHE3bTAwbXkybnFjdTVlejV0NGsifQ.7Td1_OWsFDZZjj5wcK1l1g');
+import Geolocation from '@react-native-community/geolocation'; 
 
 import api from '../../services/api';
 
@@ -43,9 +42,10 @@ import {
   DetailsModalRealtySubTitle,
   DetailsModalRealtyAddress,
 } from './styles';
-const startingPoint = ["-27.2108001", "-49.6446024"];
 
 export default class Main extends Component {
+
+
   static navigationOptions = {
     header: null,
   };
@@ -62,7 +62,7 @@ export default class Main extends Component {
         latitude: null,
         longitude: null,
       },
-      name: 'Vamos lÃ¡',
+      name: 'Vamos lá',
       typeOcurrency: '10000',
       address: 'Rua zero, 10',
       images: [],
@@ -70,19 +70,17 @@ export default class Main extends Component {
   };
 
   async componentDidMount() {
-    this.getLocation();
+     this.getLocation();
   }
-
+  
   getLocation = async () => {
-    alert('TESTE');
-    try {
+    try {   
       const response = await api.get('/properties', {
         params: {
-          latitude: -12.972218,
-          longitude: -38.501414,
+          latitude: "-27.210768",
+          longitude: "-49.644018",
         },
       });
-      alert( response.data);
       this.setState({locations: response.data});
     } catch (err) {
       alert('erro', err);
@@ -122,7 +120,6 @@ export default class Main extends Component {
         },
       });
     } catch (err) {
-      alert('erro ao selecionar localizaÃ§Ã£o',err);
       console.tron.log(err);
     }
   };
@@ -143,7 +140,7 @@ export default class Main extends Component {
           images: [...realtyData.images, data],
         },
       });
-    }    
+    }
   };
 
   handleInputChange = (index, value) => {
@@ -183,14 +180,10 @@ export default class Main extends Component {
           name,
           address,
           typeOcurrency,
-          location: {
-            latitude,
-            longitude
-          },
-          images
-        }
+          location: {latitude, longitude},
+          images,
+        },
       } = this.state;
-
       const newRealtyResponse = await api.post('/properties', {
         title: name,
         address,
@@ -199,13 +192,13 @@ export default class Main extends Component {
         longitude: Number(longitude.toFixed(6)),
       });
 
-       const imagesData = new FormData();
+      const imagesData = new FormData();
 
       images.forEach((image, index) => {
         imagesData.append('image', {
           uri: image.uri,
           type: 'image/jpeg',
-          name: `${newRealtyResponse.data.title}_${index}.jpg`
+          name: `${newRealtyResponse.data.title}_${index}.jpg`,
         });
       });
 
@@ -213,25 +206,24 @@ export default class Main extends Component {
         `/properties/${newRealtyResponse.data.id}/images`,
         imagesData,
       );
-     
-      this.getLocation()
-      this.handleDataModalClose()
-      this.setState({ newRealty: false });
-    } catch (err) {  
-      alert(err);
-      //console.log(err);
+
+      this.getLocation();
+      this.handleDataModalClose();
+      this.setState({newRealty: false});
+    } catch (err) {
+      console.tron.log(err);
     }
   };
 
   renderConditionalsButtons = () =>
     !this.state.newRealty ? (
       <NewButtonContainer onPress={this.handleNewRealtyPress}>
-        <ButtonText>Nova OcorrÃªncia</ButtonText>
+        <ButtonText>Nova Ocorrência</ButtonText>
       </NewButtonContainer>
     ) : (
       <ButtonsWrapper>
         <SelectButtonContainer onPress={this.handleGetPositionPress}>
-          <ButtonText>Selecionar localizaÃ§Ã£o</ButtonText>
+          <ButtonText>Selecionar localização</ButtonText>
         </SelectButtonContainer>
         <CancelButtonContainer onPress={this.handleNewRealtyPress}>
           <ButtonText>Cancelar</ButtonText>
@@ -262,18 +254,13 @@ export default class Main extends Component {
       />
     );
 
-  renderImagesList = () =>  
+  renderImagesList = () =>
     this.state.realtyData.images.length !== 0 && (
       <ModalImagesListContainer>
         <ModalImagesList horizontal>
-          {this.state.realtyData.images.map((image, key) => ( 
-            <ModalImageItem
-               key={key}
-               source={{uri: image.uri}}
-               resizeMode="stretch" 
-               />
+          {this.state.realtyData.images.map((image, key) => (
+            <ModalImageItem key={key} source={{uri: image.uri}} resizeMode="stretch" />
           ))}
-     
         </ModalImagesList>
       </ModalImagesListContainer>
     );
@@ -287,7 +274,7 @@ export default class Main extends Component {
             source={{uri: `http://10.0.3.2:3333/images/${image.path}`}}
             resizeMode="stretch"
           />
-        ))}''
+        ))}
       </ModalImagesList>
     );
 
@@ -306,7 +293,19 @@ export default class Main extends Component {
             style={{flex: 1}}
             type={RNCamera.Constants.Type.back}
             autoFocus={RNCamera.Constants.AutoFocus.on}
-            flashMode={RNCamera.Constants.FlashMode.off}     
+            flashMode={RNCamera.Constants.FlashMode.off}
+            androidCameraPermissionOptions={{
+              title: 'Permission to use camera',
+              message: 'We need your permission to use your camera',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+            }}
+            androidRecordAudioPermissionOptions={{
+              title: 'Permission to use audio recording',
+              message: 'We need your permission to use your audio',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+            }}
           />
           <TakePictureButtonContainer onPress={this.handleTakePicture}>
             <TakePictureButtonLabel />
@@ -339,15 +338,13 @@ export default class Main extends Component {
               this.state.realtyData.location.latitude,
             ]}
             style={{flex: 1}}
-            styleURL={MapboxGL.StyleURL.Light}>
-
+            styleURL={MapboxGL.StyleURL.Dark}>
             <MapboxGL.PointAnnotation
               id="center"
               coordinate={[
                 this.state.realtyData.location.longitude,
                 this.state.realtyData.location.latitude,
               ]}>
-
               <MarkerContainer>
                 <MarkerLabel />
               </MarkerContainer>
@@ -357,21 +354,21 @@ export default class Main extends Component {
         {this.renderImagesList()}
         <Form>
           <Input
-            placeholder="OcorrÃªncia"
+            placeholder="Ocorrência"
             value={this.state.realtyData.name}
             onChangeText={name => this.handleInputChange('name', name)}
             autoCapitalize="none"
             autoCorrect={false}
           />
           <Input
-            placeholder="EndereÃ§o"
+            placeholder="Endereço"
             value={this.state.realtyData.address}
             onChangeText={address => this.handleInputChange('address', address)}
             autoCapitalize="none"
             autoCorrect={false}
           />
           <Input
-            placeholder="PreÃ§o"
+            placeholder="Preço"
             value={this.state.realtyData.typeOcurrency}
             onChangeText={typeOcurrency => this.handleInputChange('typeOcurrency', typeOcurrency)}
             autoCapitalize="none"
@@ -380,7 +377,7 @@ export default class Main extends Component {
         </Form>
         <DataButtonsWrapper>
           <SelectButtonContainer onPress={this.saveRealty}>
-            <ButtonText>Salvar OcorrÃªncia</ButtonText>
+            <ButtonText>Salvar Ocorrência</ButtonText>
           </SelectButtonContainer>
           <CancelButtonContainer onPress={this.handleDataModalClose}>
             <ButtonText>Cancelar</ButtonText>
@@ -435,12 +432,12 @@ export default class Main extends Component {
     return (
       <Container>
         <StatusBar barStyle="light-content" />
-        <MapboxGL.MapView          
-          scrollEnabled={true}
+        <MapboxGL.MapView
           zoomEnabled={true}
-          centerCoordinate={startingPoint}
+          zoomLevel={10}
+          centerCoordinate={[-49.6446024, -27.2108001]}
           style={{flex: 1}}
-          styleURL={MapboxGL.StyleURL.Dark}
+          styleURL={MapboxGL.StyleURL.Light}
           ref={map => {
             this.map = map;
           }}>

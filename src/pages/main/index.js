@@ -4,6 +4,8 @@ import {StatusBar, Modal, AsyncStorage} from 'react-native';
 
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {RNCamera} from 'react-native-camera';
+import Geolocation from '@react-native-community/geolocation'; 
+MapboxGL.setAccessToken("pk.eyJ1IjoiZmFiaW9zYW50YW5hZ2lmIiwiYSI6ImNrcG44bHE3bTAwbXkybnFjdTVlejV0NGsifQ.7Td1_OWsFDZZjj5wcK1l1g"); 
 
 import api from '../../services/api';
 
@@ -36,7 +38,7 @@ import {
   DetailsModalSecondDivision,
   DetailsModalThirdDivision,
   DetailsModalBackButton,
-  DetailsModalPrice,
+  DetailsModaltypeOcurrency,
   DetailsModalRealtyTitle,
   DetailsModalRealtySubTitle,
   DetailsModalRealtyAddress,
@@ -60,10 +62,10 @@ export default class Main extends Component {
         latitude: null,
         longitude: null,
       },
-      name: 'Vamos lá',
-      price: '10000',
-      address: 'Rua zero, 10',
-      images: [],
+      name: '',
+      typeOcurrency: '',
+      address: '',
+      images:[],
     },
   };
 
@@ -75,8 +77,8 @@ export default class Main extends Component {
     try {
       const response = await api.get('/properties', {
         params: {
-          latitude: -12.972218,
-          longitude: -38.501414,
+          latitude: "-27.210768",
+          longitude: "-49.644018",
         },
       });
       this.setState({locations: response.data});
@@ -160,11 +162,11 @@ export default class Main extends Component {
           },
         });
         break;
-      case 'price':
+      case 'typeOcurrency':
         this.setState({
           realtyData: {
             ...realtyData,
-            price: value,
+            typeOcurrency: value,
           },
         });
         break;
@@ -177,7 +179,7 @@ export default class Main extends Component {
         realtyData: {
           name,
           address,
-          price,
+          typeOcurrency,
           location: {latitude, longitude},
           images,
         },
@@ -185,11 +187,11 @@ export default class Main extends Component {
       const newRealtyResponse = await api.post('/properties', {
         title: name,
         address,
-        price,
+        typeOcurrency,
         latitude: Number(latitude.toFixed(6)),
         longitude: Number(longitude.toFixed(6)),
       });
-      alert(newRealtyResponse);
+
       const imagesData = new FormData();
 
       images.forEach((image, index) => {
@@ -233,11 +235,11 @@ export default class Main extends Component {
     this.state.locations.map((location, index) => (
       <MapboxGL.PointAnnotation
         id={location.id.toString()}
-        coordinate={startingPoint}
+        coordinate={[parseFloat(location.longitude), parseFloat(location.latitude)]}
         key={location.id.toString()}>
         <AnnotationContainer>
           <AnnotationText onPress={() => this.handleDetailsModalClose(index)}>
-            {location.price}
+            {location.typeOcurrency}
           </AnnotationText>
         </AnnotationContainer>
       </MapboxGL.PointAnnotation>
@@ -256,8 +258,8 @@ export default class Main extends Component {
     this.state.realtyData.images.length !== 0 && (
       <ModalImagesListContainer>
         <ModalImagesList horizontal>
-          {this.state.realtyData.images.map(image => (
-            <ModalImageItem source={{uri: image.uri}} resizeMode="stretch" />
+          {this.state.realtyData.images.map((image, key) => (
+            <ModalImageItem key={key} source={{uri: image.uri}} resizeMode="stretch" />
           ))}
         </ModalImagesList>
       </ModalImagesListContainer>
@@ -292,7 +294,18 @@ export default class Main extends Component {
             type={RNCamera.Constants.Type.back}
             autoFocus={RNCamera.Constants.AutoFocus.on}
             flashMode={RNCamera.Constants.FlashMode.off}
-            androidCameraPermissionOptions={'Permission to use camera'}
+            androidCameraPermissionOptions={{
+              title: 'Permission to use camera',
+              message: 'We need your permission to use your camera',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+            }}
+            androidRecordAudioPermissionOptions={{
+              title: 'Permission to use audio recording',
+              message: 'We need your permission to use your audio',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+            }}
           />
           <TakePictureButtonContainer onPress={this.handleTakePicture}>
             <TakePictureButtonLabel />
@@ -341,7 +354,7 @@ export default class Main extends Component {
         {this.renderImagesList()}
         <Form>
           <Input
-            placeholder="Ocorrência"
+            placeholder="Nome Completo"
             value={this.state.realtyData.name}
             onChangeText={name => this.handleInputChange('name', name)}
             autoCapitalize="none"
@@ -355,9 +368,9 @@ export default class Main extends Component {
             autoCorrect={false}
           />
           <Input
-            placeholder="Preço"
-            value={this.state.realtyData.price}
-            onChangeText={price => this.handleInputChange('price', price)}
+            placeholder="Tipó de Ocorrência"
+            value={this.state.realtyData.typeOcurrency}
+            onChangeText={typeOcurrency => this.handleInputChange('typeOcurrency', typeOcurrency)}
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -404,12 +417,12 @@ export default class Main extends Component {
           {this.renderDetailsImagesList()}
         </DetailsModalSecondDivision>
         <DetailsModalThirdDivision>
-          <DetailsModalPrice>
+          <DetailsModaltypeOcurrency>
             R${' '}
             {this.state.detailsModalOpened
-              ? this.state.locations[this.state.realtyDetailed].price
+              ? this.state.locations[this.state.realtyDetailed].typeOcurrency
               : 0}
-          </DetailsModalPrice>
+          </DetailsModaltypeOcurrency>
         </DetailsModalThirdDivision>
       </ModalContainer>
     </Modal>
@@ -422,7 +435,7 @@ export default class Main extends Component {
         <MapboxGL.MapView
           zoomEnabled={true}
           zoomLevel={10}
-          centerCoordinate={startingPoint}
+          centerCoordinate={[-49.6446024, -27.2108001]}
           style={{flex: 1}}
           styleURL={MapboxGL.StyleURL.Dark}
           ref={map => {

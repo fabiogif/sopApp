@@ -14,6 +14,8 @@ target 'sp' do
 
   pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
+  pod 'react-native-location', :path => '../node_modules/react-native-location'
+
   target 'spTests' do
     inherit! :complete
     # Pods for testing

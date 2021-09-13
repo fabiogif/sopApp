@@ -10,7 +10,7 @@ export const AnnotationContainer = styled.View`
   alignItems: center;
   justifyContent: center;
   backgroundColor: #63adfc ;
-  borderRadius: 5;
+  borderRadius: 5px;
   padding: 5px;
 `;
 
@@ -21,7 +21,7 @@ export const AnnotationText = styled.Text`
 
 export const NewButtonContainer = styled.TouchableHighlight`
   position: absolute;
-  bottom: 54;
+  bottom: 54px;
   left: 5%;
   right: 5%;
   alignSelf: center;
@@ -64,7 +64,7 @@ export const Marker = styled.Image`
   height: 60px;
   position: absolute;
   alignSelf: center;
-  top: ${(Dimensions.get('window').height / 2) - 60};
+  top: ${(Dimensions.get('window').height / 2) - 60}px;
 `;
 
 export const ModalContainer = styled.View`
@@ -215,7 +215,7 @@ export const DetailsModalRealtyAddress = styled.Text`
   marginHorizontal: 60px;
 `;
 
-export const DetailsModalPrice = styled.Text`
+export const DetailsModaltypeOcurrency = styled.Text`
   color: #63adfc ;
   fontSize: 28px;
   fontWeight: bold;
