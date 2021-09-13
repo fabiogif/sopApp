@@ -7,14 +7,14 @@ const Stack = createStackNavigator();
 
 export default function Routes() {
   return (
-    <Stack.Navigator   initialRouteName="Main"
+    <Stack.Navigator  initialRouteName="SignIn"
         screenOptions={{ 
         headerTintColor: '#FFF' 
       }}
     >
       <Stack.Screen 
-        name="Main" 
-        component={Main}
+        name="SignIn" 
+        component={SignIn}
       />
      
     </Stack.Navigator>
